@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <signal.h>
+#include <syslog.h>
 
 void sig_handler(int signo);
 
@@ -50,17 +51,18 @@ int main(int argc, char* argv[]) {
 	close(STDERR_FILENO);
 // Open a log file in write mode.
 	fp = fopen("Log.txt", "w+");
+
+	if (signal(SIGTERM, sig_handler) == SIG_ERR) {
+				exit(0);
+			}
+
 	while (1) {
 //Dont block context switches, let the process sleep for some time
 		sleep(1);
 		fprintf(fp, "Logging info...\n");
 		fflush(fp);
 
-		if (signal(SIGTERM, sig_handler) == SIG_ERR) {
-			fprintf(fp, "received SIGTERM, exiting process\n");
-			fflush(fp);
-			printf("\ncan't catch SIGINT\n");
-		}
+
 // Implement and call some function that does core work for this daemon.
 	}
 	fclose(fp);
@@ -68,6 +70,9 @@ int main(int argc, char* argv[]) {
 }
 
 void sig_handler(int signo) {
+	openlog("Daemonisering ", LOG_PID, LOG_USER);
 	if (signo == SIGTERM)
+		syslog(LOG_INFO, "SIGTERM recieved, exiting");
+		closelog();
 		exit(0);
 }
