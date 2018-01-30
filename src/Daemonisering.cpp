@@ -60,9 +60,6 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	listen(listen_fd, 10); //listening to the specified ip and port and have a waiting list of 10
-	comm_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
-
 	chdir("/"); // Change the current working directory to root.
 	// Close stdin. stdout and stderr
 	close(STDIN_FILENO);
@@ -75,21 +72,19 @@ int main(int argc, char* argv[]) {
 		exit(0);
 	}
 
+	listen(listen_fd, 10); //listening to the specified ip and port and have a waiting list of 10
+	comm_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL); // Accept blocks
+
 	while (1) {
 		//Dont block context switches, let the process sleep for some time
 		sleep(1);
 		fprintf(fp, "Logging info...\n");
 		fflush(fp);
-
-		bzero(str, 100);
-		//sets str to ZERO
-		n = read(comm_fd, str, 100);
-		//reads from the client to str and puts number of signs in to n
+		bzero(str, 100); //sets str to ZERO
+		n = read(comm_fd, str, 100); //reads from the client to str and puts number of signs in to n
 		if (str != 0) {
-			write(comm_fd, str, n);
-			//writes back to the client whit the convertet text
+			write(comm_fd, str, n); //writes back to the client whit the convertet text
 		}
-
 	}
 	fclose(fp);
 	return (0);
